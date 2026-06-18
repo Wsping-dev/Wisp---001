@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>个人中心</title>
+    <style>
+        .box { width: 400px; margin: 80px auto; text-align: center; }
+        button { padding: 8px 16px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <div id="content"></div>
+        <br>
+        <button onclick="logout()">退出登录</button>
+        <br><br>
+        <a href="index.html">返回首页</a>
+    </div>
+
+    <script>
+        window.onload = async function() {
+            // 访问 /user 接口校验登录态
+            let res = await fetch('http://127.0.0.1:8080/user');
+            let html = await res.text();
+            document.getElementById('content').innerHTML = html;
+
+            // 403 未登录则跳转
+            if (res.status === 403) {
+                alert('请先登录');
+                location.href = 'login.html';
+            }
+        }
+
+        function logout() {
+            // 简单前端登出：刷新清空会话(后端Session重启服务失效)
+            alert('已退出登录');
+            location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>文件上传</title>
+    <style>
+        .box { width: 400px; margin: 60px auto; }
+        h2 { text-align: center; }
+        input { margin: 10px 0; }
+        button { padding: 8px 20px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h2>文件上传</h2>
+        <input type="file" id="file">
+        <br>
+        <button onclick="upload()">开始上传</button>
+        <p id="tip"></p>
+        <p><a href="index.html">返回首页</a></p>
+    </div>
+
+    <script>
+        async function upload() {
+            let fileDom = document.getElementById('file');
+            let file = fileDom.files[0];
+            if (!file) {
+                document.getElementById('tip').innerText = '请选择文件';
+                return;
+            }
+            let formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                let res = await fetch('http://127.0.0.1:8080/api/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                let data = await res.json();
+                document.getElementById('tip').innerText = data.msg + "，访问地址：" + data.url;
+            } catch (e) {
+                document.getElementById('tip').innerText = '上传失败';
+            }
+        }
+    </script>
+</body>
+</html>

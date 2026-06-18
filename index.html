@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文件管理系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            padding: 40px;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .hidden { display: none !important; }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 26px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .tab {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .tab button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            background: #f1f3ff;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .tab button.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            font-size: 15px;
+            outline: none;
+            transition: 0.2s;
+        }
+
+        .form-group input:focus {
+            border-color: #667eea;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .upload-area {
+            border: 2px dashed #667eea;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            margin: 25px 0;
+            background: #f8f9ff;
+        }
+
+        .upload-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .file-list {
+            list-style: none;
+            background: #fafafa;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+            gap: 12px;
+        }
+
+        .file-name {
+            flex: 1;
+            min-width: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .download-btn {
+            background: #4299e1;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+
+        .delete-btn {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+
+        .logout-box {
+            text-align: right;
+            margin-bottom: 20px;
+        }
+        .logout-btn {
+            background: #999;
+            color: #fff;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .logout-btn:hover {
+            background: #777;
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 20px;
+            border-radius: 8px;
+            color: white;
+            z-index: 999;
+            opacity: 0;
+            transition: 0.3s;
+        }
+
+        .toast.show { opacity:1; }
+        .toast.success { background:#4CAF50; }
+        .toast.error { background:#f44336; }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div id="loginBox">
+            <h1>账号登录</h1>
+            <div class="tab">
+                <button id="tabLogin" class="active">登录</button>
+                <button id="tabRegister">注册</button>
+            </div>
+
+            <div id="loginForm">
+                <div class="form-group">
+                    <input id="loginUser" placeholder="用户名">
+                </div>
+                <div class="form-group">
+                    <input id="loginPwd" type="password" placeholder="密码">
+                </div>
+                <button class="btn" onclick="login()">登录</button>
+            </div>
+
+            <div id="registerForm" class="hidden">
+                <div class="form-group">
+                    <input id="regUser" placeholder="用户名">
+                </div>
+                <div class="form-group">
+                    <input id="regPwd" type="password" placeholder="密码">
+                </div>
+                <button class="btn" onclick="register()">注册</button>
+            </div>
+        </div>
+
+        <div id="fileBox" class="hidden">
+            <div class="logout-box">
+                <button class="logout-btn" onclick="logout()">退出登录</button>
+            </div>
+            <h1>文件管理</h1>
+            <div class="upload-area">
+                <input type="file" id="fileInput" style="display:none;">
+                <label for="fileInput" class="upload-btn">选择文件</label>
+                <button class="upload-btn" onclick="upload()" style="margin-left:10px;">上传</button>
+            </div>
+            <ul class="file-list" id="fileList"></ul>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        document.cookie = "sid=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+
+        window.onload = function () {
+            document.getElementById("loginBox").classList.remove("hidden");
+            document.getElementById("fileBox").classList.add("hidden");
+        };
+
+        // 切换登录/注册
+        tabLogin.onclick = () => {
+            tabLogin.classList.add("active");
+            tabRegister.classList.remove("active");
+            loginForm.classList.remove("hidden");
+            registerForm.classList.add("hidden");
+        };
+        tabRegister.onclick = () => {
+            tabLogin.classList.remove("active");
+            tabRegister.classList.add("active");
+            loginForm.classList.add("hidden");
+            registerForm.classList.remove("hidden");
+        };
+
+        // 登录
+        async function login() {
+            let u = loginUser.value;
+            let p = loginPwd.value;
+            let res = await fetch("/api/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username: u, password: p }),
+                credentials: "include"
+            });
+            let d = await res.json();
+            if (d.code === 200) {
+                showToast("登录成功", "success");
+                setTimeout(() => {
+                    loginBox.classList.add("hidden");
+                    fileBox.classList.remove("hidden");
+                    loadFiles();
+                }, 1000);
+            } else {
+                showToast(d.msg, "error");
+            }
+        }
+
+        // 注册
+        async function register() {
+            let u = regUser.value;
+            let p = regPwd.value;
+            let res = await fetch("/api/register", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username: u, password: p }),
+                credentials: "include"
+            });
+            let d = await res.json();
+            showToast(d.msg, d.code === 200 ? "success" : "error");
+        }
+
+        // 上传（类型+大小校验）
+        async function upload() {
+            const file = fileInput.files[0];
+            if (!file) return showToast("请先选择文件", "error");
+
+            const maxSize = 10 * 1024 * 1024;
+            const allowType = [".jpg", ".png", ".gif", ".txt", ".pdf", ".jpeg"];
+            const fileName = file.name.toLowerCase();
+
+            if (file.size > maxSize) {
+                return showToast("文件过大，最大支持 10MB", "error");
+            }
+            let isAllow = false;
+            for (let ext of allowType) {
+                if (fileName.endsWith(ext)) {
+                    isAllow = true;
+                    break;
+                }
+            }
+            if (!isAllow) {
+                return showToast("仅支持 jpg/png/gif/txt/pdf 格式", "error");
+            }
+
+            let fd = new FormData();
+            fd.append("file", file);
+            await fetch("/api/upload", { method: "POST", body: fd, credentials: "include" });
+            showToast("上传成功", "success");
+            loadFiles();
+            fileInput.value = "";
+        }
+
+        // 加载文件列表
+        async function loadFiles() {
+            let r = await fetch("/api/files", { credentials: "include" });
+            let d = await r.json();
+            let list = "";
+            d.files.forEach(file => {
+                list += `
+                <li class="file-item">
+                    <span class="file-name" title="${file}">${file}</span>
+                    <div class="button-group">
+                        <button class="download-btn" onclick="downloadFile('${file}')">下载</button>
+                        <button class="delete-btn" onclick="del('${file}')">删除</button>
+                    </div>
+                </li>`;
+            });
+            fileList.innerHTML = list || "<li style='padding:15px;text-align:center;color:#999'>暂无文件</li>";
+        }
+
+        // 删除文件
+        async function del(file) {
+    if (!confirm("确定删除文件？")) return;
+    try {
+        const res = await fetch("/api/delete", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name: file }),
+            credentials: "include"
+        });
+        const data = await res.json();
+        if (data.code === 200) {
+            showToast("删除成功", "success");
+            loadFiles();
+        } else {
+            showToast(data.msg || "删除失败", "error");
+        }
+    } catch (err) {
+        showToast("网络错误", "error");
+    }
+}
+
+        // 下载文件（修复路径）
+        function downloadFile(filename) {
+            const url = `/uploads/${encodeURIComponent(filename)}`;
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        // 退出登录
+        function logout() {
+            document.cookie = "sid=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            showToast("已退出登录", "success");
+            setTimeout(() => {
+                location.reload();
+            }, 800);
+        }
+
+        // 消息提示
+        function showToast(msg, type) {
+            toast.textContent = msg;
+            toast.className = `toast ${type} show`;
+            setTimeout(() => toast.className = "toast", 2000);
+        }
+    </script>
+</body>
+</html>

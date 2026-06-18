@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>用户登录</title>
+    <style>
+        .box { width: 320px; margin: 60px auto; }
+        h2 { text-align: center; }
+        input { width: 100%; box-sizing: border-box; padding: 10px; margin: 8px 0; border: 1px solid #ccc; border-radius: 4px; }
+        button { width: 100%; padding: 10px; background: #2d8cf0; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; }
+        p { text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h2>登录</h2>
+        <input type="text" id="username" placeholder="请输入用户名">
+        <input type="password" id="password" placeholder="请输入密码">
+        <button onclick="login()">登录</button>
+        <p>没有账号？<a href="register.html">去注册</a></p>
+        <p><a href="index.html">返回首页</a></p>
+    </div>
+
+    <script>
+        async function login() {
+            let username = document.getElementById('username').value.trim();
+            let password = document.getElementById('password').value.trim();
+            if (!username || !password) {
+                alert('用户名和密码不能为空');
+                return;
+            }
+            try {
+                let res = await fetch('http://127.0.0.1:8080/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                let data = await res.json();
+                alert(data.msg);
+                if (data.code === 200) {
+                    location.href = 'user.html';
+                }
+            } catch (e) {
+                alert('请求失败，请检查服务是否启动');
+            }
+        }
+    </script>
+</body>
+</html>

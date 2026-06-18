@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>用户列表</title>
+    <style>
+        .box { width: 400px; margin: 60px auto; }
+        h2 { text-align: center; }
+        ul { line-height: 2; font-size: 16px; }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h2>已注册用户</h2>
+        <ul id="list"></ul>
+        <p><a href="index.html">返回首页</a></p>
+    </div>
+
+    <script>
+        window.onload = async function() {
+            try {
+                let res = await fetch('http://127.0.0.1:8080/api/users');
+                let userArr = await res.json();
+                let ul = document.getElementById('list');
+                userArr.forEach(name => {
+                    let li = document.createElement('li');
+                    li.innerText = name;
+                    ul.appendChild(li);
+                });
+            } catch (e) {
+                document.getElementById('list').innerText = '加载用户列表失败';
+            }
+        }
+    </script>
+</body>
+</html>
